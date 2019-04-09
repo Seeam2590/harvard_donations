@@ -18,7 +18,9 @@ output: html_document
 ```
 
 ```{r problem5 data, message = FALSE, error = FALSE, warning = FALSE, echo = FALSE}
+
   # Creating a dataframe from a dataframe object we previously made locally after lot of cleaning
+
   data5 = readRDS("data4.Rds")
   
 ```
@@ -28,29 +30,40 @@ output: html_document
 ```{r problem5, message = FALSE, error = FALSE, warning = FALSE, echo = FALSE}
 
   # Creating the dataframe we need for our graphic
+
   data5_new <- 
     data5 %>%
     # Filtering for dontaions by Harvard University
+  
     filter(employer == "HARVARD UNIVERSITY" ) %>%
     # Removing the columns we don't need
+  
     select(-c(party,cand_state,cand_name,cash)) %>%
     # Removing the the donations in other category since the number is zero and won't add anything insightful to the table
+  
     filter(cmte_party_new != "", cmte_party_new != "Other") %>%
     # Releveling the factors to make our graph look prettier
+  
     mutate(cmte_party_new = fct_relevel(cmte_party_new, c("Republican","Democrat"))) %>%
     # Removing the columns we don't need
+  
     select(-c(cand_id, cmte_id, occupation)) %>%
     # Using the date column and formatting it correctly
+  
     mutate(date = mdy(date)) %>%
     # Extracting quarters from date to provide a more insightful graph
+  
     mutate(quarter = quarter(date, with_year = TRUE)) %>%
     arrange(quarter) %>%
     # Grouping by quarter and party
+  
     group_by(quarter,cmte_party_new) %>%
     # Summarzing the total amount of donations in each quarter for each party
+  
     summarise(total_amount = sum(amount))
   
   # Giving appropriate labels to our quarters (starting dates)
+
   data5_new[1,1] <- "2005-01-01"
   data5_new[2,1] <- "2005-01-01"
   data5_new[3,1] <- "2005-04-01"
@@ -71,14 +84,19 @@ output: html_document
   # Creating our desired graph
   data5_new %>%
     # Using party as the fill, quarter as x-axis and then counting total donations
+    
     ggplot(aes(x = quarter, y = total_amount, fill = cmte_party_new)) +
     # Removing the legend in our plot
+    
     geom_col(show.legend = FALSE) +
     # Flipping axes to make it a horizontal bar chart
+    
     coord_flip() +
     # Creating different graphs for each party
+    
     facet_wrap(~cmte_party_new) +
     # Providign appropriate labels for axes and graph
+    
     xlab(NULL) + 
     ylab("Total donations in USD") +
     labs(title = "Donations by Harvard University in each quarter of 2005-2006 by party", subtitle = "Donations to Democrats spiked in 1st quarter of 2006", caption = "Source: Federal Election Commission Data")
